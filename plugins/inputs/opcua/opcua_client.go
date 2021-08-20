@@ -3,6 +3,7 @@ package opcua_client
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/url"
 	"sort"
 	"strings"
@@ -406,7 +407,11 @@ func Connect(o *OpcUA) error {
 
 		if o.client != nil {
 			if err := o.client.CloseSession(); err != nil {
-				return err
+				// "Only print the error but to not bail-out here as this prevents
+				// reconnections for multiple parties (see e.g. #9523)." -https://github.com/R290/telegraf/blob/gopcua/plugins/inputs/opcua/opcua_client.go#L415
+				// Made just this fix rather than upgrading gopcua
+				// https://community.influxdata.com/t/opcua-secure-channel-not-open/20739/3
+				log.Println("Error while closing connection: " + err.Error())
 			}
 		}
 
